@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenUSpeakUP – Student Voice Platform</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a7a4a;
+      --green-light: #22a05e;
+      --green-xlight: #d4f0e3;
+      --green-dark: #0e4f30;
+      --accent: #f5c842;
+      --accent2: #ff6b35;
+      --bg: #f4f7f5;
+      --bg2: #eaf2ec;
+      --card: #ffffff;
+      --text: #1a2e22;
+      --text2: #4a6357;
+      --text3: #7a9a88;
+      --border: #d0e4d8;
+      --shadow: 0 2px 16px rgba(26,122,74,0.10);
+      --shadow-lg: 0 8px 40px rgba(26,122,74,0.18);
+      --radius: 16px;
+      --radius-sm: 8px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+    #root { min-height: 100%; }
+
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+
+    button { font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; outline: none; }
+    input, textarea, select { font-family: 'DM Sans', sans-serif; outline: none; border: none; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--green-light); border-radius: 8px; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    @keyframes slideIn { from{transform:translateX(-20px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+    @keyframes popIn { from{transform:scale(0.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+    .fade-up { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+    .fade-in { animation: fadeIn 0.4s ease both; }
+
+    /* LOADER */
+    .loader { width:36px;height:36px;border:3px solid var(--green-xlight);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite; }
+
+    /* TOAST */
+    .toast-wrap { position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px; }
+    .toast { padding:14px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;animation:popIn 0.3s ease;box-shadow:var(--shadow-lg);max-width:320px; }
+    .toast.success { background:var(--green);color:#fff; }
+    .toast.error { background:#e53e3e;color:#fff; }
+    .toast.info { background:var(--text);color:#fff; }
+
+    /* NAV */
+    .nav { position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px; }
+    .nav-brand { display:flex;align-items:center;gap:10px;text-decoration:none; }
+    .nav-brand-icon { width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px; }
+    .nav-brand-text { font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--green-dark);letter-spacing:-0.5px; }
+    .nav-brand-text span { color:var(--green-light); }
+    .nav-right { display:flex;align-items:center;gap:12px; }
+
+    /* BUTTONS */
+    .btn { padding:10px 22px;border-radius:50px;font-weight:500;font-size:14px;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px; }
+    .btn-primary { background:var(--green);color:#fff; }
+    .btn-primary:hover { background:var(--green-dark);transform:translateY(-1px);box-shadow:var(--shadow); }
+    .btn-outline { background:transparent;border:2px solid var(--green);color:var(--green); }
+    .btn-outline:hover { background:var(--green-xlight); }
+    .btn-accent { background:var(--accent);color:var(--green-dark);font-weight:700; }
+    .btn-accent:hover { background:#e6b800;transform:translateY(-1px); }
+    .btn-ghost { background:transparent;color:var(--text2); }
+    .btn-ghost:hover { background:var(--bg2); }
+    .btn-danger { background:#fee2e2;color:#dc2626; }
+    .btn-danger:hover { background:#fca5a5; }
+    .btn-sm { padding:6px 14px;font-size:13px; }
+    .btn-lg { padding:14px 32px;font-size:16px;font-weight:600; }
+    .btn:disabled { opacity:0.55;cursor:not-allowed;transform:none!important; }
+
+    /* CARDS */
+    .card { background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:24px; }
+
+    /* BADGE */
+    .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:50px;font-size:12px;font-weight:600; }
+    .badge-green { background:var(--green-xlight);color:var(--green-dark); }
+    .badge-yellow { background:#fef3c7;color:#92400e; }
+    .badge-red { background:#fee2e2;color:#dc2626; }
+    .badge-blue { background:#dbeafe;color:#1e40af; }
+    .badge-gray { background:#f3f4f6;color:#6b7280; }
+
+    /* FORM */
+    .form-group { margin-bottom:18px; }
+    .form-label { display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.02em; }
+    .form-input { width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);font-size:14px;color:var(--text);transition:border-color 0.2s; }
+    .form-input:focus { border-color:var(--green-light);background:#fff; }
+    .form-input.error { border-color:#dc2626; }
+    textarea.form-input { resize:vertical;min-height:90px; }
+    select.form-input { appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a6357' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center; }
+
+    /* HOME PAGE */
+    .hero { min-height:100vh;background:linear-gradient(135deg,var(--green-dark) 0%,var(--green) 50%,#2d9a5c 100%);position:relative;overflow:hidden;display:flex;flex-direction:column; }
+    .hero-bg-circle { position:absolute;border-radius:50%;background:rgba(255,255,255,0.04); }
+    .hero-content { flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:80px 24px 60px;position:relative;z-index:1; }
+    .hero-tag { display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);padding:6px 16px;border-radius:50px;font-size:13px;font-weight:500;margin-bottom:28px;backdrop-filter:blur(8px); }
+    .hero-h1 { font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:800;color:#fff;line-height:1.05;letter-spacing:-2px;margin-bottom:20px; }
+    .hero-h1 em { color:var(--accent);font-style:normal; }
+    .hero-sub { font-size:clamp(16px,2vw,20px);color:rgba(255,255,255,0.78);max-width:560px;line-height:1.65;margin-bottom:40px; }
+    .hero-cta { display:flex;gap:14px;justify-content:center;flex-wrap:wrap; }
+
+    .section { padding:80px 24px; }
+    .section-label { font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-light);margin-bottom:10px; }
+    .section-h2 { font-size:clamp(28px,4vw,42px);font-weight:800;color:var(--green-dark);letter-spacing:-1px;margin-bottom:12px; }
+    .section-sub { font-size:16px;color:var(--text2);max-width:540px;line-height:1.7; }
+
+    .features-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:48px; }
+    .feature-card { background:var(--card);border-radius:var(--radius);padding:28px;border:1px solid var(--border);transition:all 0.25s;animation:fadeUp 0.5s ease both; }
+    .feature-card:hover { transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--green-light); }
+    .feature-icon { width:48px;height:48px;border-radius:12px;background:var(--green-xlight);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px; }
+    .feature-h { font-size:18px;font-weight:700;color:var(--green-dark);margin-bottom:8px; }
+    .feature-p { font-size:14px;color:var(--text2);line-height:1.7; }
+
+    .steps { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-top:48px; }
+    .step { text-align:center;padding:24px 16px; }
+    .step-num { width:52px;height:52px;border-radius:50%;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
+    .step-h { font-size:16px;font-weight:700;color:var(--green-dark);margin-bottom:6px; }
+    .step-p { font-size:14px;color:var(--text2);line-height:1.6; }
+
+    .stats-bar { background:var(--green-dark);padding:40px 24px; }
+    .stats-inner { max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:24px; }
+    .stat { text-align:center; }
+    .stat-num { font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--accent);display:block; }
+    .stat-label { font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px; }
+
+    .cta-section { background:var(--green-xlight);border-radius:var(--radius);padding:60px 40px;text-align:center;margin:0 auto;max-width:700px; }
+
+    .home-footer { background:var(--green-dark);color:rgba(255,255,255,0.6);text-align:center;padding:28px;font-size:14px; }
+    .home-footer strong { color:#fff; }
+
+    /* AUTH PAGES */
+    .auth-wrap { min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--green-dark),var(--green));padding:24px; }
+    .auth-card { background:#fff;border-radius:24px;padding:40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:popIn 0.4s ease; }
+    .auth-logo { display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px; }
+    .auth-title { font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--green-dark);text-align:center;margin-bottom:6px; }
+    .auth-sub { font-size:14px;color:var(--text2);text-align:center;margin-bottom:28px; }
+    .auth-divider { display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:13px; }
+    .auth-divider::before,.auth-divider::after { content:'';flex:1;height:1px;background:var(--border); }
+    .auth-link { text-align:center;font-size:14px;color:var(--text2);margin-top:20px; }
+    .auth-link a { color:var(--green);font-weight:600;cursor:pointer; }
+
+    /* DASHBOARD LAYOUT */
+    .dash-layout { display:flex;min-height:calc(100vh - 64px);background:var(--bg); }
+    .dash-sidebar { width:260px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);padding:20px 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;display:flex;flex-direction:column; }
+    .dash-main { flex:1;min-width:0;padding:24px; }
+    .dash-right { width:300px;flex-shrink:0;padding:24px 24px 24px 0; }
+
+    .sidebar-section { padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-top:16px;margin-bottom:4px; }
+    .sidebar-item { display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.15s;border-radius:0;border-left:3px solid transparent; }
+    .sidebar-item:hover { background:var(--bg2);color:var(--green); }
+    .sidebar-item.active { background:var(--green-xlight);color:var(--green-dark);font-weight:700;border-left-color:var(--green); }
+    .sidebar-item .si-icon { font-size:18px;width:24px;text-align:center; }
+    .sidebar-item .si-badge { margin-left:auto;background:var(--green);color:#fff;border-radius:50px;font-size:11px;padding:2px 8px;font-weight:700; }
+    .sidebar-avatar-block { padding:16px 20px;border-top:1px solid var(--border);margin-top:auto; }
+    .sidebar-avatar { display:flex;align-items:center;gap:10px; }
+    .avatar { width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0; }
+    .avatar.lg { width:56px;height:56px;font-size:20px; }
+    .avatar.xl { width:80px;height:80px;font-size:28px; }
+
+    /* FEED */
+    .feed { max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:16px; }
+    .compose-card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:16px;box-shadow:var(--shadow); }
+    .compose-row { display:flex;align-items:flex-start;gap:12px; }
+    .compose-input { flex:1;border:none;background:var(--bg);border-radius:50px;padding:11px 16px;font-size:14px;color:var(--text);resize:none;line-height:1.5; }
+    .compose-input:focus { outline:none;background:#fff;box-shadow:0 0 0 2px var(--green-light); }
+    .compose-footer { display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border); }
+    .compose-opts { display:flex;gap:4px; }
+    .compose-opt { padding:6px 10px;border-radius:8px;background:none;color:var(--text3);font-size:13px;transition:all 0.15s; }
+    .compose-opt:hover { background:var(--bg2);color:var(--green); }
+
+    .post-card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;animation:fadeUp 0.4s ease both; }
+    .post-header { padding:16px 16px 0;display:flex;align-items:center;gap:10px; }
+    .post-user-info { flex:1;min-width:0; }
+    .post-name { font-weight:700;font-size:14px;color:var(--text); }
+    .post-meta { font-size:12px;color:var(--text3);margin-top:1px; }
+    .post-body { padding:12px 16px;font-size:15px;color:var(--text);line-height:1.65; }
+    .post-category { display:inline-flex;align-items:center;gap:6px;margin:0 16px 10px;padding:4px 12px;border-radius:50px;font-size:12px;font-weight:600;background:var(--green-xlight);color:var(--green-dark); }
+    .post-actions { display:flex;border-top:1px solid var(--border); }
+    .post-action { flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.15s; }
+    .post-action:hover { background:var(--bg2);color:var(--green); }
+    .post-action.liked { color:var(--accent2); }
+    .post-action.liked:hover { background:#fff5f0; }
+    .post-priority { display:flex;align-items:center;gap:6px;padding:6px 16px;background:var(--bg);font-size:12px;color:var(--text3);border-top:1px solid var(--border); }
+
+    /* COMMENTS */
+    .comments-section { padding:0 16px 16px;border-top:1px solid var(--border); }
+    .comment-input-row { display:flex;gap:10px;align-items:flex-start;padding-top:12px; }
+    .comment-input { flex:1;border:1.5px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;background:var(--bg); }
+    .comment-input:focus { border-color:var(--green-light);background:#fff; }
+    .comment { display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border); }
+    .comment:last-of-type { border-bottom:none; }
+    .comment-bubble { flex:1;background:var(--bg);border-radius:12px;padding:10px 12px; }
+    .comment-author { font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px; }
+    .comment-text { font-size:13px;color:var(--text2);line-height:1.55; }
+
+    /* RIGHT SIDEBAR */
+    .widget { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:16px;box-shadow:var(--shadow); }
+    .widget-title { font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px; }
+    .leaderboard-item { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border); }
+    .leaderboard-item:last-child { border-bottom:none; }
+    .lb-rank { width:24px;height:24px;border-radius:50%;background:var(--green-xlight);color:var(--green-dark);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .lb-rank.gold { background:#fef3c7;color:#92400e; }
+    .lb-rank.silver { background:#f3f4f6;color:#4b5563; }
+    .lb-rank.bronze { background:#fde8d8;color:#9a3412; }
+    .lb-info { flex:1;min-width:0; }
+    .lb-title { font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .lb-meta { font-size:11px;color:var(--text3); }
+    .lb-solved { font-size:12px;font-weight:700;color:var(--green); }
+
+    /* MODAL */
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+    .modal { background:#fff;border-radius:var(--radius);padding:28px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;animation:popIn 0.3s ease;box-shadow:var(--shadow-lg); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+    .modal-title { font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green-dark); }
+    .modal-close { width:32px;height:32px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text2); }
+    .modal-close:hover { background:var(--bg2); }
+
+    /* ADMIN PANEL */
+    .admin-wrap { display:flex;min-height:calc(100vh - 64px); }
+    .admin-sidebar { width:220px;background:var(--green-dark);flex-shrink:0;padding:20px 0; }
+    .admin-side-item { display:flex;align-items:center;gap:10px;padding:12px 20px;color:rgba(255,255,255,0.7);font-size:14px;cursor:pointer;transition:all 0.15s; }
+    .admin-side-item:hover,.admin-side-item.active { background:rgba(255,255,255,0.1);color:#fff; }
+    .admin-side-item .icon { font-size:18px; }
+    .admin-content { flex:1;padding:28px;min-width:0; }
+    .admin-header { margin-bottom:24px; }
+    .admin-title { font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--green-dark); }
+    .admin-sub { font-size:14px;color:var(--text2);margin-top:4px; }
+
+    .stat-cards { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px; }
+    .stat-card { background:#fff;border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow); }
+    .stat-card-num { font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--green);display:block; }
+    .stat-card-label { font-size:13px;color:var(--text2);margin-top:4px; }
+
+    .table-wrap { background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow); }
+    .table { width:100%;border-collapse:collapse; }
+    .table th { background:var(--bg2);padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:0.05em;text-transform:uppercase; }
+    .table td { padding:12px 16px;font-size:14px;color:var(--text);border-top:1px solid var(--border); }
+    .table tr:hover td { background:var(--bg); }
+
+    .priority-bar { height:6px;border-radius:4px;background:var(--border);overflow:hidden; }
+    .priority-fill { height:100%;border-radius:4px;transition:width 0.5s; }
+
+    /* FILTER BAR */
+    .filter-bar { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px; }
+    .filter-chip { padding:6px 14px;border-radius:50px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text2);transition:all 0.15s; }
+    .filter-chip:hover,.filter-chip.active { background:var(--green);color:#fff;border-color:var(--green); }
+
+    /* NOTIF DOT */
+    .notif-dot { width:8px;height:8px;border-radius:50%;background:var(--accent2);display:inline-block;margin-left:4px; }
+
+    /* PROFILE PAGE */
+    .profile-cover { height:140px;background:linear-gradient(120deg,var(--green-dark),var(--green));border-radius:var(--radius) var(--radius) 0 0; }
+    .profile-body { padding:0 24px 24px; }
+    .profile-av-wrap { margin-top:-40px;margin-bottom:12px; }
+    .profile-name { font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green-dark); }
+    .profile-stats { display:flex;gap:24px;margin:12px 0 20px; }
+    .profile-stat { text-align:center; }
+    .profile-stat-num { font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green-dark);display:block; }
+    .profile-stat-label { font-size:12px;color:var(--text3); }
+
+    /* EMPTY STATE */
+    .empty { text-align:center;padding:48px 24px; }
+    .empty-icon { font-size:48px;margin-bottom:12px; }
+    .empty-title { font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text2);margin-bottom:6px; }
+    .empty-sub { font-size:14px;color:var(--text3); }
+
+    /* RESPONSIVE */
+    @media(max-width:1024px) { .dash-right { display:none; } }
+    @media(max-width:768px) {
+      .dash-sidebar { display:none; }
+      .admin-sidebar { display:none; }
+      .nav { padding:0 16px; }
+      .dash-main { padding:16px; }
+    }
+
+    /* STATUS COLORS */
+    .status-open { color:#dc2626;background:#fee2e2; }
+    .status-in-progress { color:#d97706;background:#fef3c7; }
+    .status-resolved { color:#16a34a;background:#dcfce7; }
+    .status-closed { color:#6b7280;background:#f3f4f6; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+    // ============ SUPABASE CONFIG ============
+    // REPLACE THESE WITH YOUR SUPABASE PROJECT CREDENTIALS
+    const SUPABASE_URL = 'https://aqsjjyiplmfrunbtwwhi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxc2pqeWlwbG1mcnVuYnR3d2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzA0NzUsImV4cCI6MjA5MDIwNjQ3NX0.EZeZ1XI4HasPxoTY5Ql-fudthuqk7XdxvIVifJfhX5s';
+
+    // ============ SIMPLE SUPABASE CLIENT ============
+    const sb = {
+      url: SUPABASE_URL,
+      key: SUPABASE_ANON_KEY,
+      token: null,
+      userId: null,
+
+      headers() {
+        const h = { 'Content-Type': 'application/json', 'apikey': this.key };
+        if (this.token) h['Authorization'] = 'Bearer ' + this.token;
+        return h;
+      },
+
+      async request(path, opts = {}) {
+        const r = await fetch(this.url + path, { ...opts, headers: { ...this.headers(), ...opts.headers } });
+        if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || e.error_description || 'Request failed'); }
+        const text = await r.text();
+        return text ? JSON.parse(text) : {};
+      },
+
+      async signUp(email, password, meta) {
+        const d = await this.request('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email, password, data: meta }) });
+        if (d.access_token) { this.token = d.access_token; this.userId = d.user.id; }
+        return d;
+      },
+
+      async signIn(email, password) {
+        const d = await this.request('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email, password }) });
+        if (d.access_token) { this.token = d.access_token; this.userId = d.user.id; }
+        return d;
+      },
+
+      async signOut() {
+        try { await this.request('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
+        this.token = null; this.userId = null;
+      },
+
+      async getUser() {
+        return this.request('/auth/v1/user');
+      },
+
+      async from(table) {
+        return {
+          _table: table,
+          _filters: [],
+          _order: null,
+          _limit: null,
+          _select: '*',
+
+          select(cols = '*') { this._select = cols; return this; },
+          eq(col, val) { this._filters.push(`${col}=eq.${val}`); return this; },
+          neq(col, val) { this._filters.push(`${col}=neq.${val}`); return this; },
+          order(col, { ascending = true } = {}) { this._order = `${col}.${ascending ? 'asc' : 'desc'}`; return this; },
+          limit(n) { this._limit = n; return this; },
+          ilike(col, val) { this._filters.push(`${col}=ilike.${encodeURIComponent(val)}`); return this; },
+
+          async get() {
+            let qs = `select=${this._select}`;
+            if (this._filters.length) qs += '&' + this._filters.join('&');
+            if (this._order) qs += `&order=${this._order}`;
+            if (this._limit) qs += `&limit=${this._limit}`;
+            const d = await sb.request(`/rest/v1/${this._table}?${qs}`, { headers: { 'Prefer': 'return=representation' } });
+            return Array.isArray(d) ? d : [d];
+          },
+
+          async insert(data) {
+            return sb.request(`/rest/v1/${this._table}`, { method: 'POST', body: JSON.stringify(data), headers: { 'Prefer': 'return=representation' } });
+          },
+
+          async update(data) {
+            let qs = this._filters.join('&');
+            return sb.request(`/rest/v1/${this._table}?${qs}`, { method: 'PATCH', body: JSON.stringify(data), headers: { 'Prefer': 'return=representation' } });
+          },
+
+          async delete() {
+            let qs = this._filters.join('&');
+            return sb.request(`/rest/v1/${this._table}?${qs}`, { method: 'DELETE' });
+          },
+
+          async upsert(data) {
+            return sb.request(`/rest/v1/${this._table}`, { method: 'POST', body: JSON.stringify(data), headers: { 'Prefer': 'return=representation,resolution=merge-duplicates' } });
+          },
+
+          async rpc(fn, params) {
+            return sb.request(`/rest/v1/rpc/${fn}`, { method: 'POST', body: JSON.stringify(params) });
+          }
+        };
+      },
+
+      async rpc(fn, params) {
+        return this.request(`/rest/v1/rpc/${fn}`, { method: 'POST', body: JSON.stringify(params) });
+      }
+    };
+
+    // ============ LOCAL DEMO DATABASE ============
+    // Full in-browser demo with localStorage — works without Supabase setup
+    const DB = (() => {
+      const ADMIN_EMAIL = 'admin@greenu.edu';
+      const ADMIN_PASS = 'Admin@123';
+
+      const get = (k, def) => { try { return JSON.parse(localStorage.getItem('gsu_' + k)) || def; } catch { return def; } };
+      const set = (k, v) => localStorage.setItem('gsu_' + k, JSON.stringify(v));
+
+      // INIT
+      if (!get('users', null)) {
+        set('users', [
+          { id: 'admin-001', name: 'Admin', email: ADMIN_EMAIL, password: ADMIN_PASS, role: 'admin', studentId: '', department: 'Admin', joinedAt: new Date().toISOString(), bio: 'Platform Administrator' }
+        ]);
+        set('posts', [
+          { id: 'p1', userId: 'u2', title: 'Cafeteria food quality has dropped significantly', body: 'Over the past month, the food quality in the main cafeteria has deteriorated. Meals are often undercooked and variety is very limited.', category: 'Facilities', priority: 'high', status: 'in-progress', likes: ['u3'], createdAt: new Date(Date.now()-86400000*2).toISOString(), updatedAt: new Date().toISOString(), resolvedAt: null },
+          { id: 'p2', userId: 'u3', title: 'Library closes too early on weekends', body: 'The library closes at 5pm on weekends which is very inconvenient during exam season. Students need access until at least 10pm.', category: 'Academic', priority: 'medium', status: 'open', likes: ['u2', 'u4'], createdAt: new Date(Date.now()-86400000).toISOString(), updatedAt: new Date().toISOString(), resolvedAt: null },
+          { id: 'p3', userId: 'u4', title: 'WiFi in Block D dormitory is extremely slow', body: 'The WiFi speed in Block D is unusable during peak hours. Students cannot attend online classes or submit assignments.', category: 'Infrastructure', priority: 'critical', status: 'resolved', likes: ['u2'], createdAt: new Date(Date.now()-86400000*5).toISOString(), updatedAt: new Date().toISOString(), resolvedAt: new Date(Date.now()-86400000).toISOString() },
+        ]);
+        set('comments', [
+          { id: 'c1', postId: 'p1', userId: 'u3', text: 'Completely agree! The food was much better last semester.', createdAt: new Date(Date.now()-3600000).toISOString() },
+          { id: 'c2', postId: 'p2', userId: 'u2', text: 'This needs to be fixed urgently before finals week.', createdAt: new Date(Date.now()-1800000).toISOString() },
+        ]);
+        set('notifications', []);
+        set('seed', true);
+      }
+
+      // Ensure demo users always exist
+      let users = get('users', []);
+      if (!users.find(u => u.id === 'u2')) {
+        users = users.filter(u => u.id !== 'u2' && u.id !== 'u3' && u.id !== 'u4');
+        users.push(
+          { id: 'u2', name: 'Sarah Ahmed', email: 'sarah@student.edu', password: 'demo123', role: 'user', studentId: 'STU2024001', department: 'Computer Science', joinedAt: new Date().toISOString(), bio: 'CS sophomore passionate about campus improvement.' },
+          { id: 'u3', name: 'Rafi Islam', email: 'rafi@student.edu', password: 'demo123', role: 'user', studentId: 'STU2024002', department: 'Business', joinedAt: new Date().toISOString(), bio: '' },
+          { id: 'u4', name: 'Nadia Khan', email: 'nadia@student.edu', password: 'demo123', role: 'user', studentId: 'STU2024003', department: 'Engineering', joinedAt: new Date().toISOString(), bio: '' }
+        );
+        set('users', users);
+      }
+
+      const genId = () => Math.random().toString(36).slice(2, 10);
+
+      return {
+        // AUTH
+        async login(email, password) {
+          const users = get('users', []);
+          const user = users.find(u => u.email === email && u.password === password);
+          if (!user) throw new Error('Invalid email or password');
+          set('session', user.id);
+          return user;
+        },
+        async register(name, email, password, studentId, department) {
+          const users = get('users', []);
+          if (users.find(u => u.email === email)) throw new Error('Email already registered');
+          const user = { id: genId(), name, email, password, role: 'user', studentId, department, joinedAt: new Date().toISOString(), bio: '' };
+          set('users', [...users, user]);
+          set('session', user.id);
+          return user;
+        },
+        async logout() { localStorage.removeItem('gsu_session'); },
+        async getSession() {
+          const id = get('session', null);
+          if (!id) return null;
+          return get('users', []).find(u => u.id === id) || null;
+        },
+        async updateProfile(id, data) {
+          const users = get('users', []).map(u => u.id === id ? { ...u, ...data } : u);
+          set('users', users);
+          set('session', id);
+          return users.find(u => u.id === id);
+        },
+
+        // POSTS
+        async getPosts(filter = {}) {
+          let posts = get('posts', []);
+          if (filter.userId) posts = posts.filter(p => p.userId === filter.userId);
+          if (filter.status) posts = posts.filter(p => p.status === filter.status);
+          if (filter.category) posts = posts.filter(p => p.category === filter.category);
+          if (filter.priority) posts = posts.filter(p => p.priority === filter.priority);
+          posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+          const users = get('users', []);
+          return posts.map(p => ({ ...p, user: users.find(u => u.id === p.userId) }));
+        },
+        async createPost(userId, { title, body, category, priority }) {
+          const posts = get('posts', []);
+          const post = { id: 'p' + genId(), userId, title, body, category, priority, status: 'open', likes: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), resolvedAt: null };
+          set('posts', [post, ...posts]);
+          // notify admin
+          this.addNotif('admin-001', `New post: "${title.slice(0,40)}..."`, 'post', post.id);
+          return post;
+        },
+        async updatePost(id, data) {
+          const posts = get('posts', []).map(p => p.id === id ? { ...p, ...data, updatedAt: new Date().toISOString() } : p);
+          set('posts', posts);
+          return posts.find(p => p.id === id);
+        },
+        async deletePost(id) {
+          set('posts', get('posts', []).filter(p => p.id !== id));
+          set('comments', get('comments', []).filter(c => c.postId !== id));
+        },
+        async toggleLike(postId, userId) {
+          const posts = get('posts', []);
+          const post = posts.find(p => p.id === postId);
+          if (!post) return;
+          const liked = post.likes.includes(userId);
+          post.likes = liked ? post.likes.filter(id => id !== userId) : [...post.likes, userId];
+          set('posts', posts.map(p => p.id === postId ? post : p));
+          return post;
+        },
+
+        // COMMENTS
+        async getComments(postId) {
+          const comments = get('comments', []).filter(c => c.postId === postId);
+          comments.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+          const users = get('users', []);
+          return comments.map(c => ({ ...c, user: users.find(u => u.id === c.userId) }));
+        },
+        async addComment(postId, userId, text) {
+          const comments = get('comments', []);
+          const c = { id: 'c' + genId(), postId, userId, text, createdAt: new Date().toISOString() };
+          set('comments', [...comments, c]);
+          const posts = get('posts', []);
+          const post = posts.find(p => p.id === postId);
+          if (post && post.userId !== userId) {
+            this.addNotif(post.userId, `Someone commented on your post`, 'comment', postId);
+          }
+          return c;
+        },
+        async deleteComment(id) {
+          set('comments', get('comments', []).filter(c => c.id !== id));
+        },
+
+        // NOTIFICATIONS
+        addNotif(userId, msg, type, refId) {
+          const ns = get('notifications', []);
+          ns.unshift({ id: genId(), userId, msg, type, refId, read: false, createdAt: new Date().toISOString() });
+          set('notifications', ns.slice(0, 100));
+        },
+        async getNotifs(userId) {
+          return get('notifications', []).filter(n => n.userId === userId);
+        },
+        async markNotifsRead(userId) {
+          const ns = get('notifications', []).map(n => n.userId === userId ? { ...n, read: true } : n);
+          set('notifications', ns);
+        },
+
+        // ADMIN
+        async getStats() {
+          const posts = get('posts', []);
+          const users = get('users', []).filter(u => u.role === 'user');
+          const comments = get('comments', []);
+          return {
+            total: posts.length, open: posts.filter(p => p.status === 'open').length,
+            inProgress: posts.filter(p => p.status === 'in-progress').length,
+            resolved: posts.filter(p => p.status === 'resolved').length,
+            users: users.length, comments: comments.length,
+            critical: posts.filter(p => p.priority === 'critical').length
+          };
+        },
+        async getAllUsers() {
+          return get('users', []).filter(u => u.role !== 'admin');
+        },
+        async getLeaderboard() {
+          const posts = get('posts', []);
+          const cats = {};
+          posts.filter(p => p.status === 'resolved').forEach(p => {
+            cats[p.category] = (cats[p.category] || 0) + 1;
+          });
+          return Object.entries(cats).map(([cat, count]) => ({ category: cat, solved: count })).sort((a,b) => b.solved - a.solved);
+        }
+      };
+    })();
+
+    // ============ APP CONTEXT ============
+    const AppCtx = createContext();
+    const useApp = () => useContext(AppCtx);
+
+    // ============ TOAST SYSTEM ============
+    function useToast() {
+      const [toasts, setToasts] = useState([]);
+      const show = useCallback((msg, type = 'success') => {
+        const id = Date.now();
+        setToasts(t => [...t, { id, msg, type }]);
+        setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+      }, []);
+      return { toasts, show };
+    }
+
+    // ============ UTILS ============
+    const timeAgo = (iso) => {
+      const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s/60) + 'm ago';
+      if (s < 86400) return Math.floor(s/3600) + 'h ago';
+      return Math.floor(s/86400) + 'd ago';
+    };
+
+    const avatarLetter = (name) => (name || '?').charAt(0).toUpperCase();
+
+    const priorityColor = (p) => ({ critical: 'badge-red', high: 'badge-red', medium: 'badge-yellow', low: 'badge-green' }[p] || 'badge-gray');
+    const statusColor = (s) => ({ open: 'status-open', 'in-progress': 'status-in-progress', resolved: 'status-resolved', closed: 'status-closed' }[s] || '');
+
+    const CATEGORIES = ['Academic', 'Facilities', 'Infrastructure', 'Administrative', 'Safety', 'Transportation', 'Library', 'Food & Dining', 'Housing', 'Other'];
+    const PRIORITIES = ['low', 'medium', 'high', 'critical'];
+    const STATUSES = ['open', 'in-progress', 'resolved', 'closed'];
+
+    // ============ COMPONENTS ============
+
+    function Nav({ user, onLogout, onNavigate, page }) {
+      const [notifs, setNotifs] = useState([]);
+      const [showNotif, setShowNotif] = useState(false);
+
+      useEffect(() => {
+        if (user) DB.getNotifs(user.id).then(ns => setNotifs(ns));
+      }, [user, page]);
+
+      const unread = notifs.filter(n => !n.read).length;
+
+      const markRead = async () => {
+        await DB.markNotifsRead(user.id);
+        setNotifs(n => n.map(x => ({ ...x, read: true })));
+      };
+
+      return (
+        <nav className="nav">
+          <a className="nav-brand" onClick={() => onNavigate(user ? 'dashboard' : 'home')} style={{cursor:'pointer'}}>
+            <div className="nav-brand-icon">🌿</div>
+            <span className="nav-brand-text">GreenU<span>SpeakUP</span></span>
+          </a>
+          <div className="nav-right">
+            {user ? (<>
+              {user.role === 'admin' && (
+                <button className={`btn btn-sm ${page==='admin'?'btn-primary':'btn-ghost'}`} onClick={() => onNavigate('admin')}>⚙️ Admin Panel</button>
+              )}
+              <div style={{position:'relative'}}>
+                <button className="btn btn-ghost btn-sm" onClick={() => { setShowNotif(!showNotif); if(!showNotif) markRead(); }} style={{position:'relative'}}>
+                  🔔 {unread > 0 && <span className="notif-dot"></span>}
+                </button>
+                {showNotif && (
+                  <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',background:'#fff',border:'1px solid var(--border)',borderRadius:'var(--radius)',boxShadow:'var(--shadow-lg)',width:300,zIndex:200,maxHeight:300,overflowY:'auto'}}>
+                    <div style={{padding:'12px 16px',fontWeight:700,fontSize:14,borderBottom:'1px solid var(--border)',fontFamily:'Syne'}}>Notifications</div>
+                    {notifs.length === 0 ? <div style={{padding:'20px',textAlign:'center',color:'var(--text3)',fontSize:13}}>No notifications</div>
+                      : notifs.slice(0,15).map(n => (
+                        <div key={n.id} style={{padding:'10px 16px',borderBottom:'1px solid var(--border)',fontSize:13,opacity:n.read?0.6:1,background:n.read?'transparent':'var(--green-xlight)'}}>
+                          <div style={{color:'var(--text)'}}>{n.msg}</div>
+                          <div style={{color:'var(--text3)',fontSize:11,marginTop:3}}>{timeAgo(n.createdAt)}</div>
+                        </div>
+                      ))
+                    }
+                  </div>
+                )}
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('profile')}>
+                <div className="avatar" style={{width:28,height:28,fontSize:12}}>{avatarLetter(user.name)}</div>
+                {user.name.split(' ')[0]}
+              </button>
+              <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign Out</button>
+            </>) : (<>
+              <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('login')}>Sign In</button>
+              <button className="btn btn-primary btn-sm" onClick={() => onNavigate('register')}>Register Free</button>
+            </>)}
+          </div>
+        </nav>
+      );
+    }
+
+    // ============ HOME PAGE ============
+    function HomePage({ onNavigate }) {
+      return (
+        <div>
+          {/* HERO */}
+          <div className="hero">
+            <div className="hero-bg-circle" style={{width:600,height:600,top:-200,right:-200}}></div>
+            <div className="hero-bg-circle" style={{width:400,height:400,bottom:-100,left:-100}}></div>
+            <div className="hero-content">
+              <div className="hero-tag fade-up" style={{animationDelay:'0s'}}>🌿 Student Voice Platform</div>
+              <h1 className="hero-h1 fade-up" style={{animationDelay:'0.1s'}}>Your Campus.<br/><em>Your Voice.</em><br/>Your Change.</h1>
+              <p className="hero-sub fade-up" style={{animationDelay:'0.2s'}}>GreenUSpeakUP is a transparent platform where students can raise concerns, track resolutions, and drive real change in their university community.</p>
+              <div className="hero-cta fade-up" style={{animationDelay:'0.3s'}}>
+                <button className="btn btn-accent btn-lg" onClick={() => onNavigate('register')}>Get Started — It's Free</button>
+                <button className="btn btn-lg" style={{background:'rgba(255,255,255,0.15)',color:'#fff',border:'2px solid rgba(255,255,255,0.3)'}} onClick={() => onNavigate('login')}>Sign In</button>
+              </div>
+            </div>
+          </div>
+
+          {/* STATS */}
+          <div className="stats-bar">
+            <div className="stats-inner">
+              {[['🎓','2,400+','Students Joined'],['📋','840+','Concerns Raised'],['✅','94%','Resolution Rate'],['⚡','48h','Avg Response Time']].map(([e,n,l]) => (
+                <div key={l} className="stat">
+                  <span style={{fontSize:28}}>{e}</span>
+                  <span className="stat-num">{n}</span>
+                  <div className="stat-label">{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ABOUT */}
+          <div className="section" style={{maxWidth:1100,margin:'0 auto'}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:60,alignItems:'center'}}>
+              <div>
+                <div className="section-label">About GreenUSpeakUP</div>
+                <h2 className="section-h2">What is this platform about?</h2>
+                <p className="section-sub">GreenUSpeakUP bridges the gap between students and university administration. Too often, student concerns go unheard — lost in email chains, ignored suggestion boxes, or buried in bureaucracy.</p>
+                <p style={{fontSize:16,color:'var(--text2)',marginTop:16,lineHeight:1.7}}>Our platform gives every student a <strong>public, transparent</strong> space to raise their voice. When concerns are visible to everyone, accountability follows naturally. Each post is tracked, prioritized, and managed by dedicated admins until resolution.</p>
+                <div style={{marginTop:28,display:'flex',gap:12,flexWrap:'wrap'}}>
+                  {['🔒 Anonymous option','📊 Priority tracking','✉️ Status updates','🏆 Weekly leaderboard'].map(f => (
+                    <div key={f} className="badge badge-green" style={{padding:'8px 14px',fontSize:13}}>{f}</div>
+                  ))}
+                </div>
+              </div>
+              <div style={{background:'var(--green-xlight)',borderRadius:24,padding:40,textAlign:'center'}}>
+                <div style={{fontSize:80,marginBottom:16}}>🏛️</div>
+                <h3 style={{fontFamily:'Syne',fontSize:22,fontWeight:800,color:'var(--green-dark)',marginBottom:12}}>Our Motive</h3>
+                <p style={{fontSize:15,color:'var(--text2)',lineHeight:1.7}}>"Every student deserves to be heard. We believe universities grow stronger when student voices shape campus decisions. GreenUSpeakUP exists to make that conversation open, fair, and effective."</p>
+                <div style={{marginTop:20,fontSize:13,color:'var(--text3)',fontStyle:'italic'}}>— The GreenUSpeakUP Team</div>
+              </div>
+            </div>
+          </div>
+
+          {/* HOW IT WORKS */}
+          <div className="section" style={{background:'var(--bg2)'}}>
+            <div style={{maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+              <div className="section-label">How It Works</div>
+              <h2 className="section-h2">Simple. Transparent. Effective.</h2>
+              <div className="steps">
+                {[['1','Register & Join','Create your free student account in under 2 minutes using your university email.'],
+                  ['2','Post Your Concern','Share your concern with the community. Categorize it and set the priority level.'],
+                  ['3','Community Engages','Fellow students can see, like, and comment on posts — building collective voice.'],
+                  ['4','Admin Acts','Our admin team reviews, prioritizes, and works toward resolving every concern.'],
+                  ['5','Track & Celebrate','Follow resolution progress and celebrate solved issues on the weekly leaderboard!'],
+                ].map(([n,h,p]) => (
+                  <div key={n} className="step">
+                    <div className="step-num">{n}</div>
+                    <div className="step-h">{h}</div>
+                    <div className="step-p">{p}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* FEATURES */}
+          <div className="section" style={{maxWidth:1100,margin:'0 auto'}}>
+            <div className="section-label">Features</div>
+            <h2 className="section-h2">Everything you need</h2>
+            <div className="features-grid">
+              {[
+                ['📣','Open Feed','A Facebook-style feed where all posts are visible to the student community in real time.'],
+                ['❤️','Like & Comment','Engage with posts through likes and comments to show solidarity and add context.'],
+                ['🏆','Weekly Leaderboard','See which concern categories are being resolved fastest. Transparency drives action.'],
+                ['⚡','Priority System','Posts are tagged Low / Medium / High / Critical so urgent matters get fast attention.'],
+                ['🔔','Notifications','Get notified when your post receives comments or status updates from the admin.'],
+                ['🛡️','Admin Dashboard','A dedicated panel for admins to manage, triage, and resolve student concerns efficiently.'],
+              ].map(([i,h,p],idx) => (
+                <div key={h} className="feature-card" style={{animationDelay: idx*0.1 + 's'}}>
+                  <div className="feature-icon">{i}</div>
+                  <div className="feature-h">{h}</div>
+                  <div className="feature-p">{p}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="section" style={{maxWidth:1100,margin:'0 auto'}}>
+            <div className="cta-section">
+              <div style={{fontSize:48,marginBottom:16}}>🌿</div>
+              <h2 style={{fontFamily:'Syne',fontSize:32,fontWeight:800,color:'var(--green-dark)',marginBottom:12}}>Ready to make your voice count?</h2>
+              <p style={{fontSize:16,color:'var(--text2)',marginBottom:28}}>Join thousands of students already driving change on their campus.</p>
+              <button className="btn btn-primary btn-lg" onClick={() => onNavigate('register')}>Join GreenUSpeakUP Today</button>
+            </div>
+          </div>
+
+          <div className="home-footer">
+            <div style={{marginBottom:8}}>🌿 <strong>GreenUSpeakUP</strong> — Where Student Voices Shape Campus Life</div>
+            <div>Built with transparency & purpose • {new Date().getFullYear()}</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============ AUTH PAGES ============
+    function LoginPage({ onLogin, onNavigate, toast }) {
+      const [email, setEmail] = useState('');
+      const [pass, setPass] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      const submit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+          const user = await DB.login(email, pass);
+          toast('Welcome back, ' + user.name + '! 👋');
+          onLogin(user);
+        } catch(err) {
+          toast(err.message, 'error');
+        }
+        setLoading(false);
+      };
+
+      return (
+        <div className="auth-wrap">
+          <div className="auth-card">
+            <div className="auth-logo">
+              <div className="nav-brand-icon">🌿</div>
+              <span className="nav-brand-text">GreenU<span>SpeakUP</span></span>
+            </div>
+            <h2 className="auth-title">Welcome Back</h2>
+            <p className="auth-sub">Sign in to continue raising your voice</p>
+            <form onSubmit={submit}>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input className="form-input" type="email" placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} required />
+              </div>
+              <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',marginTop:8}} disabled={loading}>
+                {loading ? <span className="loader" style={{width:18,height:18,borderWidth:2}}></span> : 'Sign In →'}
+              </button>
+            </form>
+            <div className="auth-divider">Demo Accounts</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',marginBottom:12}}>
+              {[['Admin','admin@greenu.edu','Admin@123'],['Student','sarah@student.edu','demo123']].map(([r,e,p]) => (
+                <button key={r} className="btn btn-outline btn-sm" onClick={() => { setEmail(e); setPass(p); }}>
+                  {r === 'Admin' ? '⚙️' : '🎓'} {r}
+                </button>
+              ))}
+            </div>
+            <p className="auth-link">Don't have an account? <a onClick={() => onNavigate('register')}>Register free</a></p>
+            <p className="auth-link"><a onClick={() => onNavigate('home')}>← Back to Home</a></p>
+          </div>
+        </div>
+      );
+    }
+
+    function RegisterPage({ onLogin, onNavigate, toast }) {
+      const [form, setForm] = useState({ name:'', email:'', password:'', confirm:'', studentId:'', department:'' });
+      const [loading, setLoading] = useState(false);
+      const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+      const submit = async (e) => {
+        e.preventDefault();
+        if (form.password !== form.confirm) { toast('Passwords do not match', 'error'); return; }
+        if (form.password.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+        setLoading(true);
+        try {
+          const user = await DB.register(form.name, form.email, form.password, form.studentId, form.department);
+          toast('Welcome to GreenUSpeakUP, ' + user.name + '! 🎉');
+          onLogin(user);
+        } catch(err) {
+          toast(err.message, 'error');
+        }
+        setLoading(false);
+      };
+
+      return (
+        <div className="auth-wrap">
+          <div className="auth-card">
+            <div className="auth-logo">
+              <div className="nav-brand-icon">🌿</div>
+              <span className="nav-brand-text">GreenU<span>SpeakUP</span></span>
+            </div>
+            <h2 className="auth-title">Join the Movement</h2>
+            <p className="auth-sub">Create your free student account</p>
+            <form onSubmit={submit}>
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input className="form-input" placeholder="Your full name" value={form.name} onChange={e=>set('name',e.target.value)} required />
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div className="form-group">
+                  <label className="form-label">Student ID</label>
+                  <input className="form-input" placeholder="STU2024..." value={form.studentId} onChange={e=>set('studentId',e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Department</label>
+                  <select className="form-input" value={form.department} onChange={e=>set('department',e.target.value)}>
+                    <option value="">Select...</option>
+                    {['Computer Science','Engineering','Business','Law','Medicine','Arts','Sciences','Other'].map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input className="form-input" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set('email',e.target.value)} required />
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input className="form-input" type="password" placeholder="Min 6 chars" value={form.password} onChange={e=>set('password',e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Confirm Password</label>
+                  <input className="form-input" type="password" placeholder="Repeat" value={form.confirm} onChange={e=>set('confirm',e.target.value)} required />
+                </div>
+              </div>
+              <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',marginTop:8}} disabled={loading}>
+                {loading ? <span className="loader" style={{width:18,height:18,borderWidth:2}}></span> : 'Create Account →'}
+              </button>
+            </form>
+            <p className="auth-link">Already have an account? <a onClick={() => onNavigate('login')}>Sign in</a></p>
+            <p className="auth-link"><a onClick={() => onNavigate('home')}>← Back to Home</a></p>
+          </div>
+        </div>
+      );
+    }
+
+    // ============ POST CARD ============
+    function PostCard({ post, user, onUpdate, toast }) {
+      const [showComments, setShowComments] = useState(false);
+      const [comments, setComments] = useState([]);
+      const [commentText, setCommentText] = useState('');
+      const [liked, setLiked] = useState(post.likes?.includes(user?.id));
+      const [likeCount, setLikeCount] = useState(post.likes?.length || 0);
+      const [loading, setLoading] = useState(false);
+
+      const toggleComments = async () => {
+        if (!showComments) {
+          const c = await DB.getComments(post.id);
+          setComments(c);
+        }
+        setShowComments(!showComments);
+      };
+
+      const handleLike = async () => {
+        if (!user) return;
+        const newLiked = !liked;
+        setLiked(newLiked);
+        setLikeCount(c => newLiked ? c+1 : c-1);
+        await DB.toggleLike(post.id, user.id);
+      };
+
+      const addComment = async (e) => {
+        e.preventDefault();
+        if (!commentText.trim()) return;
+        setLoading(true);
+        try {
+          const c = await DB.addComment(post.id, user.id, commentText.trim());
+          const enriched = { ...c, user };
+          setComments(cs => [...cs, enriched]);
+          setCommentText('');
+        } catch(err) { toast(err.message, 'error'); }
+        setLoading(false);
+      };
+
+      const isOwner = user?.id === post.userId;
+      const isAdmin = user?.role === 'admin';
+
+      const deletePost = async () => {
+        if (!window.confirm('Delete this post?')) return;
+        await DB.deletePost(post.id);
+        toast('Post deleted');
+        onUpdate();
+      };
+
+      return (
+        <div className="post-card">
+          <div className="post-header">
+            <div className="avatar">{avatarLetter(post.user?.name)}</div>
+            <div className="post-user-info">
+              <div className="post-name">{post.user?.name || 'Unknown'}</div>
+              <div className="post-meta">{post.user?.department} · {timeAgo(post.createdAt)}</div>
+            </div>
+            <div style={{display:'flex',gap:6,alignItems:'center'}}>
+              <span className={`badge ${priorityColor(post.priority)}`}>{post.priority}</span>
+              <span className={`badge ${statusColor(post.status)}`} style={{padding:'3px 10px',borderRadius:'50px',fontSize:12,fontWeight:600}}>{post.status}</span>
+              {(isOwner || isAdmin) && (
+                <button className="btn btn-ghost btn-sm" onClick={deletePost} title="Delete" style={{padding:'4px 8px',color:'var(--text3)'}}>🗑️</button>
+              )}
+            </div>
+          </div>
+          <div className="post-body">
+            <div style={{fontFamily:'Syne',fontWeight:700,fontSize:16,color:'var(--green-dark)',marginBottom:6}}>{post.title}</div>
+            {post.body}
+          </div>
+          <div className="post-category">🏷️ {post.category}</div>
+          <div className="post-actions">
+            <div className={`post-action ${liked ? 'liked' : ''}`} onClick={handleLike}>
+              {liked ? '❤️' : '🤍'} {likeCount > 0 && likeCount} Like
+            </div>
+            <div className="post-action" onClick={toggleComments}>
+              💬 Comment
+            </div>
+            <div className="post-action" onClick={() => { navigator.clipboard?.writeText(post.title); toast('Copied!', 'info'); }}>
+              🔗 Share
+            </div>
+          </div>
+          {showComments && (
+            <div className="comments-section">
+              {comments.map(c => (
+                <div key={c.id} className="comment">
+                  <div className="avatar" style={{width:30,height:30,fontSize:12}}>{avatarLetter(c.user?.name)}</div>
+                  <div className="comment-bubble">
+                    <div className="comment-author">{c.user?.name} <span style={{color:'var(--text3)',fontWeight:400,fontSize:11}}>· {timeAgo(c.createdAt)}</span></div>
+                    <div className="comment-text">{c.text}</div>
+                  </div>
+                </div>
+              ))}
+              <form className="comment-input-row" onSubmit={addComment}>
+                <div className="avatar" style={{width:30,height:30,fontSize:12}}>{avatarLetter(user?.name)}</div>
+                <input className="comment-input" placeholder="Write a comment..." value={commentText} onChange={e=>setCommentText(e.target.value)} />
+                <button className="btn btn-primary btn-sm" type="submit" disabled={loading || !commentText.trim()}>Post</button>
+              </form>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ============ CREATE POST MODAL ============
+    function CreatePostModal({ user, onClose, onPost, toast }) {
+      const [form, setForm] = useState({ title:'', body:'', category:'Academic', priority:'medium' });
+      const [loading, setLoading] = useState(false);
+      const set = (k,v) => setForm(f => ({ ...f, [k]: v }));
+
+      const submit = async (e) => {
+        e.preventDefault();
+        if (!form.title.trim() || !form.body.trim()) { toast('Please fill all fields', 'error'); return; }
+        setLoading(true);
+        try {
+          await DB.createPost(user.id, form);
+          toast('Your concern has been posted! 📣');
+          onPost();
+          onClose();
+        } catch(err) { toast(err.message, 'error'); }
+        setLoading(false);
+      };
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">📣 Raise a Concern</div>
+              <div className="modal-close" onClick={onClose}>✕</div>
+            </div>
+            <form onSubmit={submit}>
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input className="form-input" placeholder="Brief, clear title for your concern" value={form.title} onChange={e=>set('title',e.target.value)} maxLength={120} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea className="form-input" placeholder="Describe the issue in detail. Include relevant location, time, and impact..." value={form.body} onChange={e=>set('body',e.target.value)} rows={5} required />
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div className="form-group">
+                  <label className="form-label">Category</label>
+                  <select className="form-input" value={form.category} onChange={e=>set('category',e.target.value)}>
+                    {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Priority</label>
+                  <select className="form-input" value={form.priority} onChange={e=>set('priority',e.target.value)}>
+                    {PRIORITIES.map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{display:'flex',gap:12,justifyContent:'flex-end',marginTop:8}}>
+                <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? <span className="loader" style={{width:16,height:16,borderWidth:2}}></span> : '📣 Post Concern'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // ============ DASHBOARD ============
+    function Dashboard({ user, toast, onNavigate }) {
+      const [posts, setPosts] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [showCreate, setShowCreate] = useState(false);
+      const [filter, setFilter] = useState({ category: '', status: '', priority: '' });
+      const [leaderboard, setLeaderboard] = useState([]);
+      const [activeTab, setActiveTab] = useState('all');
+
+      const loadPosts = async () => {
+        setLoading(true);
+        const f = {};
+        if (activeTab === 'mine') f.userId = user.id;
+        if (filter.status) f.status = filter.status;
+        if (filter.category) f.category = filter.category;
+        if (filter.priority) f.priority = filter.priority;
+        const p = await DB.getPosts(f);
+        setPosts(p);
+        setLoading(false);
+      };
+
+      const loadLeaderboard = async () => {
+        const lb = await DB.getLeaderboard();
+        setLeaderboard(lb);
+      };
+
+      useEffect(() => { loadPosts(); }, [activeTab, filter]);
+      useEffect(() => { loadLeaderboard(); }, []);
+
+      const stats = { total: posts.length, open: posts.filter(p=>p.status==='open').length, resolved: posts.filter(p=>p.status==='resolved').length };
+
+      return (
+        <div className="dash-layout">
+          {/* LEFT SIDEBAR */}
+          <div className="dash-sidebar">
+            <div className="sidebar-section">Navigation</div>
+            {[
+              ['🏠','Feed',() => setActiveTab('all'), activeTab==='all'],
+              ['📝','My Posts',() => setActiveTab('mine'), activeTab==='mine'],
+              ['🏆','Leaderboard',() => {}, false],
+              ['🔔','Notifications',() => {}, false],
+            ].map(([icon, label, action, active]) => (
+              <div key={label} className={`sidebar-item ${active ? 'active' : ''}`} onClick={action}>
+                <span className="si-icon">{icon}</span> {label}
+              </div>
+            ))}
+            <div className="sidebar-section">Filter by Status</div>
+            {['all',...STATUSES].map(s => (
+              <div key={s} className={`sidebar-item ${filter.status===s||(s==='all'&&!filter.status)?'active':''}`}
+                onClick={() => setFilter(f => ({ ...f, status: s==='all' ? '' : s }))}>
+                <span className="si-icon">{({all:'📋',open:'🔴','in-progress':'🟡',resolved:'🟢',closed:'⚫'}[s])}</span>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </div>
+            ))}
+            <div className="sidebar-section">Filter by Category</div>
+            {CATEGORIES.slice(0,6).map(c => (
+              <div key={c} className={`sidebar-item ${filter.category===c?'active':''}`}
+                onClick={() => setFilter(f => ({ ...f, category: filter.category===c ? '' : c }))}>
+                <span className="si-icon">🏷️</span> {c}
+              </div>
+            ))}
+            <div className="sidebar-avatar-block">
+              <div className="sidebar-avatar">
+                <div className="avatar">{avatarLetter(user.name)}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:'var(--text)'}}>{user.name}</div>
+                  <div style={{fontSize:12,color:'var(--text3)'}}>{user.department}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN FEED */}
+          <div className="dash-main">
+            <div className="feed">
+              {/* Compose */}
+              <div className="compose-card">
+                <div className="compose-row">
+                  <div className="avatar">{avatarLetter(user.name)}</div>
+                  <div className="compose-input" onClick={() => setShowCreate(true)} style={{cursor:'pointer',color:'var(--text3)'}}>
+                    What concern would you like to raise, {user.name.split(' ')[0]}?
+                  </div>
+                </div>
+                <div className="compose-footer">
+                  <div className="compose-opts">
+                    {[['📋','Complaint'],['💡','Suggestion'],['🚨','Urgent'],['🔧','Maintenance']].map(([i,l]) => (
+                      <button key={l} className="compose-opt" onClick={() => setShowCreate(true)}>{i} {l}</button>
+                    ))}
+                  </div>
+                  <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>📣 Post</button>
+                </div>
+              </div>
+
+              {/* Mini stats */}
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
+                {[['📋',stats.total,'Total'],['🔴',stats.open,'Open'],['✅',stats.resolved,'Resolved']].map(([i,n,l]) => (
+                  <div key={l} style={{background:'#fff',borderRadius:12,padding:'12px 16px',border:'1px solid var(--border)',textAlign:'center'}}>
+                    <div style={{fontSize:20}}>{i}</div>
+                    <div style={{fontFamily:'Syne',fontWeight:800,fontSize:20,color:'var(--green-dark)'}}>{n}</div>
+                    <div style={{fontSize:12,color:'var(--text3)'}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Posts */}
+              {loading ? (
+                <div style={{display:'flex',justifyContent:'center',padding:40}}><div className="loader"></div></div>
+              ) : posts.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-icon">📭</div>
+                  <div className="empty-title">No concerns found</div>
+                  <div className="empty-sub">Be the first to raise a concern or adjust your filters.</div>
+                </div>
+              ) : posts.map((post, i) => (
+                <PostCard key={post.id} post={post} user={user} onUpdate={loadPosts} toast={toast} />
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="dash-right">
+            <div className="widget">
+              <div className="widget-title">🏆 Weekly Leaderboard</div>
+              <div style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>Most resolved concern categories this week</div>
+              {leaderboard.length === 0 ? <div style={{fontSize:13,color:'var(--text3)'}}>No resolved issues yet this week.</div>
+                : leaderboard.map((item, i) => (
+                  <div key={item.category} className="leaderboard-item">
+                    <div className={`lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}`}>{i+1}</div>
+                    <div className="lb-info">
+                      <div className="lb-title">{item.category}</div>
+                      <div className="lb-meta">Concerns solved</div>
+                    </div>
+                    <div className="lb-solved">✅ {item.solved}</div>
+                  </div>
+                ))
+              }
+            </div>
+            <div className="widget">
+              <div className="widget-title">📊 Platform Stats</div>
+              {[['👥','Students',posts.length > 0 ? '4' : '1'],['📋','Total Posts',posts.length],['✅','Resolved',posts.filter(p=>p.status==='resolved').length]].map(([i,l,v]) => (
+                <div key={l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                  <span style={{fontSize:13,color:'var(--text2)'}}>{i} {l}</span>
+                  <span style={{fontWeight:700,color:'var(--green-dark)'}}>{v}</span>
+                </div>
+              ))}
+            </div>
+            <div className="widget" style={{background:'var(--green-dark)',border:'none'}}>
+              <div style={{color:'var(--accent)',fontFamily:'Syne',fontWeight:800,fontSize:15,marginBottom:8}}>💡 Tip of the Day</div>
+              <div style={{fontSize:13,color:'rgba(255,255,255,0.8)',lineHeight:1.6}}>Tag your posts with the correct priority. Critical issues get reviewed within 24 hours!</div>
+            </div>
+          </div>
+
+          {showCreate && <CreatePostModal user={user} onClose={() => setShowCreate(false)} onPost={loadPosts} toast={toast} />}
+        </div>
+      );
+    }
+
+    // ============ PROFILE PAGE ============
+    function ProfilePage({ user, setUser, toast }) {
+      const [posts, setPosts] = useState([]);
+      const [editing, setEditing] = useState(false);
+      const [form, setForm] = useState({ name: user.name, department: user.department, bio: user.bio || '', studentId: user.studentId || '' });
+      const [loading, setLoading] = useState(false);
+      const set = (k,v) => setForm(f => ({ ...f, [k]: v }));
+
+      useEffect(() => {
+        DB.getPosts({ userId: user.id }).then(setPosts);
+      }, []);
+
+      const save = async () => {
+        setLoading(true);
+        try {
+          const updated = await DB.updateProfile(user.id, form);
+          setUser(updated);
+          setEditing(false);
+          toast('Profile updated! ✨');
+        } catch(err) { toast(err.message, 'error'); }
+        setLoading(false);
+      };
+
+      return (
+        <div className="dash-layout">
+          <div className="dash-sidebar">
+            <div className="sidebar-section">Profile</div>
+            <div className="sidebar-item active"><span className="si-icon">👤</span> My Profile</div>
+            <div className="sidebar-item"><span className="si-icon">📝</span> My Posts</div>
+          </div>
+          <div className="dash-main">
+            <div style={{maxWidth:640,margin:'0 auto'}}>
+              <div className="card" style={{padding:0,overflow:'hidden'}}>
+                <div className="profile-cover"></div>
+                <div className="profile-body">
+                  <div className="profile-av-wrap">
+                    <div className="avatar xl">{avatarLetter(user.name)}</div>
+                  </div>
+                  {editing ? (
+                    <div>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+                        <div className="form-group">
+                          <label className="form-label">Name</label>
+                          <input className="form-input" value={form.name} onChange={e=>set('name',e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Department</label>
+                          <select className="form-input" value={form.department} onChange={e=>set('department',e.target.value)}>
+                            {['Computer Science','Engineering','Business','Law','Medicine','Arts','Sciences','Other'].map(d => <option key={d}>{d}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Student ID</label>
+                        <input className="form-input" value={form.studentId} onChange={e=>set('studentId',e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Bio</label>
+                        <textarea className="form-input" value={form.bio} onChange={e=>set('bio',e.target.value)} rows={3} placeholder="Tell the community about yourself..." />
+                      </div>
+                      <div style={{display:'flex',gap:10}}>
+                        <button className="btn btn-primary" onClick={save} disabled={loading}>{loading ? '...' : 'Save Changes'}</button>
+                        <button className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="profile-name">{user.name}</div>
+                      <div style={{fontSize:14,color:'var(--text2)',marginTop:4}}>{user.department} {user.studentId && `· ${user.studentId}`}</div>
+                      {user.bio && <div style={{fontSize:14,color:'var(--text2)',marginTop:10,lineHeight:1.65}}>{user.bio}</div>}
+                      <div className="profile-stats">
+                        <div className="profile-stat"><span className="profile-stat-num">{posts.length}</span><span className="profile-stat-label">Posts</span></div>
+                        <div className="profile-stat"><span className="profile-stat-num">{posts.filter(p=>p.status==='resolved').length}</span><span className="profile-stat-label">Resolved</span></div>
+                        <div className="profile-stat"><span className="profile-stat-num">{posts.reduce((s,p)=>s+(p.likes?.length||0),0)}</span><span className="profile-stat-label">Likes Received</span></div>
+                      </div>
+                      <button className="btn btn-outline btn-sm" onClick={() => setEditing(true)}>✏️ Edit Profile</button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div style={{marginTop:20}}>
+                <h3 style={{fontFamily:'Syne',fontWeight:800,fontSize:18,color:'var(--green-dark)',marginBottom:14}}>My Posts ({posts.length})</h3>
+                {posts.map(p => <PostCard key={p.id} post={p} user={user} onUpdate={() => DB.getPosts({userId:user.id}).then(setPosts)} toast={toast} />)}
+                {posts.length === 0 && <div className="empty"><div className="empty-icon">📭</div><div className="empty-title">No posts yet</div><div className="empty-sub">Start raising concerns from the dashboard!</div></div>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============ ADMIN PANEL ============
+    function AdminPanel({ user, toast }) {
+      const [tab, setTab] = useState('overview');
+      const [posts, setPosts] = useState([]);
+      const [users, setUsers] = useState([]);
+      const [stats, setStats] = useState({});
+      const [loading, setLoading] = useState(true);
+      const [filter, setFilter] = useState({ status: '', priority: '', category: '' });
+      const [editPost, setEditPost] = useState(null);
+
+      const load = async () => {
+        setLoading(true);
+        const [p, u, s] = await Promise.all([DB.getPosts(filter), DB.getAllUsers(), DB.getStats()]);
+        setPosts(p); setUsers(u); setStats(s);
+        setLoading(false);
+      };
+
+      useEffect(() => { load(); }, [tab, filter]);
+
+      const updateStatus = async (postId, status) => {
+        const data = { status };
+        if (status === 'resolved') data.resolvedAt = new Date().toISOString();
+        await DB.updatePost(postId, data);
+        toast(`Status updated to "${status}" ✅`);
+        load();
+      };
+
+      const updatePriority = async (postId, priority) => {
+        await DB.updatePost(postId, { priority });
+        toast('Priority updated');
+        load();
+      };
+
+      const deletePost = async (id) => {
+        if (!confirm('Delete this post permanently?')) return;
+        await DB.deletePost(id);
+        toast('Post deleted');
+        load();
+      };
+
+      const sideItems = [
+        ['📊','Overview','overview'],
+        ['📋','All Posts','posts'],
+        ['👥','Users','users'],
+        ['🏆','Leaderboard','leaderboard'],
+      ];
+
+      return (
+        <div className="admin-wrap">
+          <div className="admin-sidebar">
+            <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.1)',marginBottom:8}}>
+              <div style={{color:'rgba(255,255,255,0.5)',fontSize:11,fontWeight:700,letterSpacing:'0.1em',textTransform:'uppercase'}}>Admin Panel</div>
+              <div style={{color:'#fff',fontFamily:'Syne',fontWeight:800,fontSize:15,marginTop:4}}>GreenUSpeakUP</div>
+            </div>
+            {sideItems.map(([icon,label,id]) => (
+              <div key={id} className={`admin-side-item ${tab===id?'active':''}`} onClick={() => setTab(id)}>
+                <span className="icon">{icon}</span> {label}
+              </div>
+            ))}
+            <div style={{padding:'16px 20px',marginTop:'auto',borderTop:'1px solid rgba(255,255,255,0.1)'}}>
+              <div className="sidebar-avatar">
+                <div className="avatar" style={{background:'var(--accent)',color:'var(--green-dark)'}}>{avatarLetter(user.name)}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>{user.name}</div>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,0.5)'}}>Administrator</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-content">
+            {tab === 'overview' && (
+              <div>
+                <div className="admin-header">
+                  <div className="admin-title">Dashboard Overview</div>
+                  <div className="admin-sub">Monitor and manage all student concerns</div>
+                </div>
+                <div className="stat-cards">
+                  {[['📋','Total Posts',stats.total,'var(--green)'],['🔴','Open',stats.open,'#dc2626'],['🟡','In Progress',stats.inProgress,'#d97706'],['✅','Resolved',stats.resolved,'#16a34a'],['👥','Students',stats.users,'var(--green)'],['🚨','Critical',stats.critical,'#dc2626']].map(([i,l,v,c]) => (
+                    <div key={l} className="stat-card">
+                      <span style={{fontSize:24}}>{i}</span>
+                      <span className="stat-card-num" style={{color:c}}>{v ?? 0}</span>
+                      <div className="stat-card-label">{l}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <h3 style={{fontFamily:'Syne',fontWeight:800,fontSize:18,color:'var(--green-dark)',marginBottom:16}}>Recent Posts</h3>
+                <div className="table-wrap">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Title</th><th>Student</th><th>Category</th><th>Priority</th><th>Status</th><th>Date</th><th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {posts.slice(0,8).map(p => (
+                        <tr key={p.id}>
+                          <td style={{maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontWeight:600}}>{p.title}</td>
+                          <td>{p.user?.name}</td>
+                          <td><span className="badge badge-blue">{p.category}</span></td>
+                          <td><span className={`badge ${priorityColor(p.priority)}`}>{p.priority}</span></td>
+                          <td>
+                            <select value={p.status} onChange={e=>updateStatus(p.id,e.target.value)} style={{fontSize:12,border:'1px solid var(--border)',borderRadius:6,padding:'4px 8px',background:'#fff'}}>
+                              {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </td>
+                          <td style={{fontSize:12,color:'var(--text3)'}}>{timeAgo(p.createdAt)}</td>
+                          <td>
+                            <button className="btn btn-danger btn-sm" onClick={() => deletePost(p.id)}>🗑️</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {tab === 'posts' && (
+              <div>
+                <div className="admin-header">
+                  <div className="admin-title">All Posts</div>
+                  <div className="admin-sub">Manage, triage, and update all student concerns</div>
+                </div>
+
+                <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap',alignItems:'center'}}>
+                  <select className="form-input" style={{width:'auto',minWidth:140}} value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))}>
+                    <option value="">All Statuses</option>
+                    {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <select className="form-input" style={{width:'auto',minWidth:140}} value={filter.priority} onChange={e=>setFilter(f=>({...f,priority:e.target.value}))}>
+                    <option value="">All Priorities</option>
+                    {PRIORITIES.map(p=><option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <select className="form-input" style={{width:'auto',minWidth:160}} value={filter.category} onChange={e=>setFilter(f=>({...f,category:e.target.value}))}>
+                    <option value="">All Categories</option>
+                    {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setFilter({status:'',priority:'',category:''})}>Clear</button>
+                  <span style={{marginLeft:'auto',fontSize:13,color:'var(--text3)'}}>{posts.length} posts</span>
+                </div>
+
+                {loading ? <div style={{display:'flex',justifyContent:'center',padding:60}}><div className="loader"></div></div> : (
+                  <div className="table-wrap">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Title</th><th>Student</th><th>Category</th><th>Priority</th><th>Status</th><th>Likes</th><th>Date</th><th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {posts.map(p => (
+                          <tr key={p.id}>
+                            <td style={{maxWidth:220}}>
+                              <div style={{fontWeight:600,marginBottom:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{p.title}</div>
+                              <div style={{fontSize:11,color:'var(--text3)'}}>{p.body?.slice(0,60)}...</div>
+                            </td>
+                            <td>
+                              <div style={{fontWeight:600,fontSize:13}}>{p.user?.name}</div>
+                              <div style={{fontSize:11,color:'var(--text3)'}}>{p.user?.department}</div>
+                            </td>
+                            <td><span className="badge badge-blue">{p.category}</span></td>
+                            <td>
+                              <select value={p.priority} onChange={e=>updatePriority(p.id,e.target.value)} style={{fontSize:12,border:'1px solid var(--border)',borderRadius:6,padding:'4px 8px',background:'#fff'}}>
+                                {PRIORITIES.map(pr=><option key={pr} value={pr}>{pr}</option>)}
+                              </select>
+                            </td>
+                            <td>
+                              <select value={p.status} onChange={e=>updateStatus(p.id,e.target.value)} style={{fontSize:12,border:'1px solid var(--border)',borderRadius:6,padding:'4px 8px',background:'#fff'}}>
+                                {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
+                              </select>
+                            </td>
+                            <td>❤️ {p.likes?.length || 0}</td>
+                            <td style={{fontSize:12,color:'var(--text3)'}}>{timeAgo(p.createdAt)}</td>
+                            <td>
+                              <button className="btn btn-danger btn-sm" onClick={() => deletePost(p.id)}>🗑️</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {tab === 'users' && (
+              <div>
+                <div className="admin-header">
+                  <div className="admin-title">Registered Students</div>
+                  <div className="admin-sub">{users.length} students registered</div>
+                </div>
+                <div className="table-wrap">
+                  <table className="table">
+                    <thead>
+                      <tr><th>Student</th><th>Email</th><th>Department</th><th>Student ID</th><th>Joined</th></tr>
+                    </thead>
+                    <tbody>
+                      {users.map(u => (
+                        <tr key={u.id}>
+                          <td>
+                            <div style={{display:'flex',alignItems:'center',gap:10}}>
+                              <div className="avatar" style={{width:32,height:32,fontSize:13}}>{avatarLetter(u.name)}</div>
+                              <div style={{fontWeight:600}}>{u.name}</div>
+                            </div>
+                          </td>
+                          <td style={{fontSize:13,color:'var(--text2)'}}>{u.email}</td>
+                          <td><span className="badge badge-green">{u.department || 'N/A'}</span></td>
+                          <td style={{fontSize:13,color:'var(--text3)'}}>{u.studentId || '—'}</td>
+                          <td style={{fontSize:12,color:'var(--text3)'}}>{timeAgo(u.joinedAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {tab === 'leaderboard' && (
+              <div>
+                <div className="admin-header">
+                  <div className="admin-title">Resolution Leaderboard</div>
+                  <div className="admin-sub">Categories ranked by resolved concerns</div>
+                </div>
+                <AdminLeaderboard posts={posts} />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function AdminLeaderboard({ posts }) {
+      const catStats = {};
+      CATEGORIES.forEach(c => {
+        const cp = posts.filter(p => p.category === c);
+        catStats[c] = { total: cp.length, resolved: cp.filter(p=>p.status==='resolved').length, open: cp.filter(p=>p.status==='open').length, inProgress: cp.filter(p=>p.status==='in-progress').length };
+      });
+      const sorted = Object.entries(catStats).filter(([,s]) => s.total > 0).sort((a,b) => b[1].resolved - a[1].resolved);
+
+      return (
+        <div>
+          {sorted.length === 0 && <div className="empty"><div className="empty-icon">📊</div><div className="empty-title">No data yet</div></div>}
+          {sorted.map(([cat, s], i) => (
+            <div key={cat} className="card" style={{marginBottom:12,padding:20}}>
+              <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:12}}>
+                <div className={`lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}`} style={{width:36,height:36,fontSize:16}}>#{i+1}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:'Syne',fontWeight:800,fontSize:16,color:'var(--green-dark)'}}>{cat}</div>
+                  <div style={{fontSize:13,color:'var(--text3)'}}>{s.total} total concerns</div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontFamily:'Syne',fontWeight:800,fontSize:22,color:'var(--green)'}}>✅ {s.resolved}</div>
+                  <div style={{fontSize:12,color:'var(--text3)'}}>resolved</div>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+                {[['🔴','Open',s.open],['🟡','In Progress',s.inProgress],['✅','Resolved',s.resolved]].map(([i,l,v]) => (
+                  <div key={l} style={{textAlign:'center',background:'var(--bg)',borderRadius:8,padding:'8px 4px'}}>
+                    <div style={{fontSize:16}}>{i}</div>
+                    <div style={{fontWeight:700,color:'var(--green-dark)'}}>{v}</div>
+                    <div style={{fontSize:11,color:'var(--text3)'}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              {s.total > 0 && (
+                <div style={{marginTop:12}}>
+                  <div className="priority-bar">
+                    <div className="priority-fill" style={{width: `${Math.round((s.resolved/s.total)*100)}%`, background: 'var(--green)'}}></div>
+                  </div>
+                  <div style={{fontSize:11,color:'var(--text3)',marginTop:4}}>{Math.round((s.resolved/s.total)*100)}% resolution rate</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ============ MAIN APP ============
+    function App() {
+      const [page, setPage] = useState('home');
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const { toasts, show: toast } = useToast();
+
+      useEffect(() => {
+        DB.getSession().then(u => {
+          if (u) { setUser(u); setPage('dashboard'); }
+          setLoading(false);
+        });
+      }, []);
+
+      const handleLogin = (u) => {
+        setUser(u);
+        setPage(u.role === 'admin' ? 'admin' : 'dashboard');
+      };
+
+      const handleLogout = async () => {
+        await DB.logout();
+        setUser(null);
+        setPage('home');
+        toast('Signed out. See you soon! 👋', 'info');
+      };
+
+      const navigate = (p) => setPage(p);
+
+      if (loading) return (
+        <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--green-dark)'}}>
+          <div style={{textAlign:'center'}}>
+            <div style={{fontSize:48,marginBottom:16}}>🌿</div>
+            <div className="loader" style={{margin:'0 auto'}}></div>
+            <div style={{color:'rgba(255,255,255,0.7)',marginTop:16,fontSize:14}}>Loading GreenUSpeakUP...</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div>
+          {/* TOASTS */}
+          <div className="toast-wrap">
+            {toasts.map(t => <div key={t.id} className={`toast ${t.type}`}>{t.msg}</div>)}
+          </div>
+
+          {/* NAV - shown on all pages except auth */}
+          {!['login','register'].includes(page) && (
+            <Nav user={user} onLogout={handleLogout} onNavigate={navigate} page={page} />
+          )}
+
+          {page === 'home' && <HomePage onNavigate={navigate} />}
+          {page === 'login' && <LoginPage onLogin={handleLogin} onNavigate={navigate} toast={toast} />}
+          {page === 'register' && <RegisterPage onLogin={handleLogin} onNavigate={navigate} toast={toast} />}
+          {page === 'dashboard' && user && <Dashboard user={user} toast={toast} onNavigate={navigate} />}
+          {page === 'profile' && user && <ProfilePage user={user} setUser={(u) => { setUser(u); }} toast={toast} />}
+          {page === 'admin' && user?.role === 'admin' && <AdminPanel user={user} toast={toast} />}
+
+          {/* Redirect if not authenticated */}
+          {['dashboard','profile'].includes(page) && !user && navigate('login')}
+          {page === 'admin' && user?.role !== 'admin' && navigate('dashboard')}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
